@@ -512,14 +512,27 @@ public class SpecificCompiler {
     }
   }
 
-  /** Utility for template use.  Returns the unboxed java type for a Schema. */
+  /**
+   * Utility for template use.  Returns the unboxed java type for a Schema.
+   * @Deprecated use javaUnbox(Schema, boolean), kept for backward compatibiliby of custom templates
+   */
   public String javaUnbox(Schema schema) {
+    return javaUnbox(schema, false);
+  }
+
+  /** Utility for template use.  Returns the unboxed java type for a Schema including the void type. */
+  public String javaUnbox(Schema schema, boolean unboxNullToVoid) {
     switch (schema.getType()) {
     case INT:     return "int";
     case LONG:    return "long";
     case FLOAT:   return "float";
     case DOUBLE:  return "double";
     case BOOLEAN: return "boolean";
+    case NULL:
+      if (unboxNullToVoid) {
+        // Used for preventing unnecessary returns for RPC methods without response but with error(s)
+        return "void";
+      }
     default:      return javaType(schema);
     }
   }

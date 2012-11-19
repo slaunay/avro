@@ -557,7 +557,7 @@ public class TestNettyServerWithCallbacks {
     }
 
     @Override
-    public Void error() throws AvroRemoteException, TestError {
+    public void error() throws AvroRemoteException, TestError {
       throw TestError.newBuilder().setMessage$("Test Message").build();
     }
 
@@ -629,11 +629,11 @@ public class TestNettyServerWithCallbacks {
     }
 
     @Override
-    public Void error() throws AvroRemoteException, TestError {
+    public void error() throws AvroRemoteException, TestError {
       releaseEnterPermit();
       acquireRunPermit();
       try {
-        return super.error();
+        super.error();
       } finally {
         releaseRunPermit();
       }
