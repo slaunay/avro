@@ -268,11 +268,22 @@ public class TestReflect {
   // test union annotation on methods and parameters
   public static interface P0 {
     @Union({Void.class,String.class})
-      String foo(@Union({Void.class,String.class}) String s);
+    String foo(@Union({Void.class,String.class}) String s);
+    List<R6> fooList1(@Union({Void.class,String.class}) List<String> l);
+    @Union({ String.class, Integer.class })
+    List<Object> fooList2(@Union({Integer.class,Long.class}) List<Number> l);
+    R6[] fooArray1(@Union({Void.class,String.class}) String[] l);
+    @Union({ String.class, Integer.class })
+    Object[] fooArray2(@Union({Integer.class,Long.class}) Number[] l);
+    Map<String, R6> fooMap1(@Union({Void.class,String.class}) Map<String, String> m);
+    @Union({String.class,Integer.class})
+    Map<String, Object> fooMap2(@Union({Integer.class,Long.class}) Map<String, Number> m);
   }
 
   @Test public void testP0() throws Exception {
     Protocol p0 = ReflectData.get().getProtocol(P0.class);
+    assertEquals(7, p0.getMessages().size());
+    // First message
     Protocol.Message message = p0.getMessages().get("foo");
     // check response schema is union
     Schema response = message.getResponse();
@@ -290,6 +301,141 @@ public class TestReflect {
     // check union erasure
     assertEquals(String.class, ReflectData.get().getClass(response));
     assertEquals(String.class, ReflectData.get().getClass(param));
+    // Second and fourth message
+    for (String method : Arrays.asList("fooList1", "fooArray1")) {
+        message = p0.getMessages().get(method);
+        // check response schema is array
+        response = message.getResponse();
+        assertEquals(Schema.Type.ARRAY, response.getType());
+        assertEquals(Schema.Type.UNION, response.getElementType().getType());
+        assertEquals(Schema.Type.RECORD, response.getElementType().getTypes().get(0).getType());
+        assertEquals(Schema.Type.RECORD, response.getElementType().getTypes().get(1).getType());
+        // check request schema is array
+        request = message.getRequest();
+        field = request.getField("l");
+        assertNotNull("field 's' should not be null", field);
+        param = field.schema();
+        assertEquals(Schema.Type.ARRAY, param.getType());
+        assertEquals(Schema.Type.UNION, param.getElementType().getType());
+        assertEquals(Schema.Type.NULL, param.getElementType().getTypes().get(0).getType());
+        assertEquals(Schema.Type.STRING, param.getElementType().getTypes().get(1).getType());
+    }
+    // Third and fifth message
+    for (String method : Arrays.asList("fooList2", "fooArray2")) {
+        message = p0.getMessages().get(method);
+        // check response schema is union
+        response = message.getResponse();
+        assertEquals(Schema.Type.ARRAY, response.getType());
+        assertEquals(Schema.Type.UNION, response.getElementType().getType());
+        assertEquals(Schema.Type.STRING, response.getElementType().getTypes().get(0).getType());
+        assertEquals(Schema.Type.INT, response.getElementType().getTypes().get(1).getType());
+        // check request schema is union
+        request = message.getRequest();
+        field = request.getField("l");
+        assertNotNull("field 's' should not be null", field);
+        param = field.schema();
+        assertEquals(Schema.Type.ARRAY, param.getType());
+        assertEquals(Schema.Type.UNION, param.getElementType().getType());
+        assertEquals(Schema.Type.INT, param.getElementType().getTypes().get(0).getType());
+        assertEquals(Schema.Type.LONG, param.getElementType().getTypes().get(1).getType());
+    }
+    // Sixth message
+    message = p0.getMessages().get("fooMap1");
+    // check response schema is map
+    response = message.getResponse();
+    assertEquals(Schema.Type.MAP, response.getType());
+    assertEquals(Schema.Type.UNION, response.getValueType().getType());
+    assertEquals(Schema.Type.RECORD, response.getValueType().getTypes().get(0).getType());
+    assertEquals(Schema.Type.RECORD, response.getValueType().getTypes().get(1).getType());
+    // check request schema is map
+    request = message.getRequest();
+    field = request.getField("m");
+    assertNotNull("field 's' should not be null", field);
+    param = field.schema();
+    assertEquals(Schema.Type.MAP, param.getType());
+    assertEquals(Schema.Type.UNION, param.getValueType().getType());
+    assertEquals(Schema.Type.NULL, param.getValueType().getTypes().get(0).getType());
+    assertEquals(Schema.Type.STRING, param.getValueType().getTypes().get(1).getType());
+    // Seventh message
+    message = p0.getMessages().get("fooMap2");
+    // check response schema is map
+    response = message.getResponse();
+    assertEquals(Schema.Type.MAP, response.getType());
+    assertEquals(Schema.Type.UNION, response.getValueType().getType());
+    assertEquals(Schema.Type.STRING, response.getValueType().getTypes().get(0).getType());
+    assertEquals(Schema.Type.INT, response.getValueType().getTypes().get(1).getType());
+    // check request schema is map
+    request = message.getRequest();
+    field = request.getField("m");
+    assertNotNull("field 's' should not be null", field);
+    param = field.schema();
+    assertEquals(Schema.Type.MAP, param.getType());
+    assertEquals(Schema.Type.UNION, param.getValueType().getType());
+    assertEquals(Schema.Type.INT, param.getValueType().getTypes().get(0).getType());
+    assertEquals(Schema.Type.LONG, param.getValueType().getTypes().get(1).getType());
+  }
+ 
+  // test double union annotation for the return type with list
+  public static interface P01 {
+    @Union({String.class,Integer.class})
+    List<R6> foo();
+  }
+
+  @Test(expected=AvroTypeException.class)
+  public void testP01() throws Exception {
+    ReflectData.get().getProtocol(P01.class);
+  }
+ 
+  // test double union annotation for parameter with list
+  public static interface P02 {
+    void foo(@Union({String.class,Integer.class}) List<R6> l);
+  }
+
+  @Test(expected=AvroTypeException.class)
+  public void testP02() throws Exception {
+    ReflectData.get().getProtocol(P02.class);
+  }
+ 
+  // test double union annotation for return type with map
+  public static interface P03 {
+      @Union({String.class,Integer.class})
+      Map<String,R6> foo();
+    }
+
+  @Test(expected=AvroTypeException.class)
+  public void testP03() throws Exception {
+    ReflectData.get().getProtocol(P03.class);
+  }
+ 
+  // test double union annotation for parameter with map
+  public static interface P04 {
+    void foo(@Union({String.class,Integer.class}) Map<String,R6> m);
+  }
+
+  @Test(expected=AvroTypeException.class)
+  public void testP04() throws Exception {
+    ReflectData.get().getProtocol(P04.class);
+  }
+ 
+  // test double union annotation for return type with record
+  public static interface P05 {
+      @Union({String.class,Integer.class})
+      R6 foo();
+    }
+
+  @Test(expected=AvroTypeException.class)
+  public void testP05() throws Exception {
+    ReflectData.get().getProtocol(P05.class);
+  }
+ 
+  // test double union annotation for parameter with record
+  public static interface P06 {
+    void foo(@Union({String.class,Integer.class}) R6 r);
+  }
+
+  @Test(expected=AvroTypeException.class)
+  public void testP06() throws Exception {
+    ReflectData.get().getProtocol(P06.class);
   }
 
   // test Stringable annotation

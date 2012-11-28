@@ -401,6 +401,44 @@ public class ReflectData extends SpecificData {
     return Schema.createUnion(branches);
   }
 
+  // Transform a component schema (Array, Map) to use an union for the component type
+  private Schema getSchemaWithUnionComponent(Schema schema, Union union, Map<String, Schema> names) {
+    Schema unionSchema = getAnnotatedUnion(union, names);
+    // Use the union schema by default
+    Schema newSchema = unionSchema;
+    boolean foundAnotherUnion = false;
+    // If this a collection type (Array, Map)?
+    if (schema.getType() == org.apache.avro.Schema.Type.ARRAY
+     || schema.getType() == org.apache.avro.Schema.Type.MAP) {
+      if (schema.getType() == org.apache.avro.Schema.Type.ARRAY) {
+        if (schema.getElementType().getType() == org.apache.avro.Schema.Type.UNION) {
+          foundAnotherUnion = true;
+        } else {
+          newSchema = Schema.createArray(unionSchema);
+        }
+      } else {
+        if (schema.getValueType().getType() == org.apache.avro.Schema.Type.UNION) {
+          foundAnotherUnion = true;
+        } else {
+          newSchema = Schema.createMap(unionSchema);
+        }
+      }
+      if (!foundAnotherUnion) {
+        // Clone props like java classes, key classes, ...
+        for (Map.Entry<String, JsonNode> prop : schema.getJsonProps().entrySet()) {
+          newSchema.addProp(prop.getKey(), prop.getValue());
+        }
+      }
+    } else if (schema.getType() == org.apache.avro.Schema.Type.UNION) {
+      foundAnotherUnion = true;
+    }
+    if (foundAnotherUnion) {
+      throw new AvroTypeException("Error converting schema to a union for "+schema
+                                  +" because it is already annotated with @Union on the class");
+    }
+    return newSchema;
+  }
+
   /** Create and return a union of the null schema and the provided schema. */
   public static Schema makeNullable(Schema schema) {
     return Schema.createUnion(Arrays.asList(Schema.create(Schema.Type.NULL),
@@ -471,12 +509,20 @@ public class ReflectData extends SpecificData {
     Type[] paramTypes = method.getGenericParameterTypes();
     Annotation[][] annotations = method.getParameterAnnotations();
     for (int i = 0; i < paramTypes.length; i++) {
-      Schema paramSchema = getSchema(paramTypes[i], names);
+      Union union = null;
+      boolean foundNullable = false;
       for (int j = 0; j < annotations[i].length; j++)
         if (annotations[i][j] instanceof Union)
-          paramSchema = getAnnotatedUnion(((Union)annotations[i][j]), names);
+          union = (Union)annotations[i][j];
         else if (annotations[i][j] instanceof Nullable)
-          paramSchema = makeNullable(paramSchema);
+          foundNullable = true;
+      Schema paramSchema = getSchema(paramTypes[i], names);
+      if (union != null) {
+        paramSchema = getSchemaWithUnionComponent(paramSchema, union, names);
+      }
+      if (foundNullable) {
+        paramSchema = makeNullable(paramSchema);
+      }
       String paramName =  paramNames.length == paramTypes.length
         ? paramNames[i]
         : paramSchema.getName()+i;
@@ -486,9 +532,10 @@ public class ReflectData extends SpecificData {
     Schema request = Schema.createRecord(fields);
 
     Union union = method.getAnnotation(Union.class);
-    Schema response = union == null
-      ? getSchema(method.getGenericReturnType(), names)
-      : getAnnotatedUnion(union, names);
+    Schema response = getSchema(method.getGenericReturnType(), names);
+    if (union != null) {
+        response = getSchemaWithUnionComponent(response, union, names);
+    }
     if (method.isAnnotationPresent(Nullable.class))          // nullable
       response = makeNullable(response);
 
