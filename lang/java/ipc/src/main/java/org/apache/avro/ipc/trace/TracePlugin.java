@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import org.apache.avro.AvroRemoteException;
 import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
@@ -82,13 +81,12 @@ public class TracePlugin extends RPCPlugin {
     }
 
     @Override
-    public List<Span> getAllSpans() throws AvroRemoteException {
+    public List<Span> getAllSpans() {
       return this.spanStorage.getAllSpans();
     }
 
     @Override
-    public List<Span> getSpansInRange(long start, long end)
-      throws AvroRemoteException {
+    public List<Span> getSpansInRange(long start, long end) {
       return this.spanStorage.getSpansInRange(start, end);
     }
   }

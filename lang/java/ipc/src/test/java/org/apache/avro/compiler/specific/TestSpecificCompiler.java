@@ -117,7 +117,7 @@ public class TestSpecificCompiler {
 
     assertTrue(protocol.contains("java.lang.CharSequence goto$(java.lang.CharSequence break$)"));
     assertTrue(protocol.contains("public interface default$"));
-    assertTrue(protocol.contains("throws org.apache.avro.AvroRemoteException, finally$"));
+    assertTrue(protocol.contains("throws finally$"));
     
     assertCompilesWithJavaCompiler(c);
 

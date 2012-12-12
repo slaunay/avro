@@ -537,27 +537,27 @@ public class TestNettyServerWithCallbacks {
     }
     
     @Override
-    public String hello(String greeting) throws AvroRemoteException {
+    public String hello(String greeting) {
       return "Hello, " + greeting;
     }
 
     @Override
-    public TestRecord echo(TestRecord record) throws AvroRemoteException {
+    public TestRecord echo(TestRecord record) {
       return record;
     }
 
     @Override
-    public int add(int arg1, int arg2) throws AvroRemoteException {
+    public int add(int arg1, int arg2) {
       return arg1 + arg2;
     }
 
     @Override
-    public ByteBuffer echoBytes(ByteBuffer data) throws AvroRemoteException {
+    public ByteBuffer echoBytes(ByteBuffer data) {
       return data;
     }
 
     @Override
-    public Void error() throws AvroRemoteException, TestError {
+    public Void error() throws TestError {
       throw TestError.newBuilder().setMessage$("Test Message").build();
     }
 
@@ -585,7 +585,7 @@ public class TestNettyServerWithCallbacks {
     }
     
     @Override
-    public String hello(String greeting) throws AvroRemoteException {
+    public String hello(String greeting) {
       releaseEnterPermit();
       acquireRunPermit();
       try {
@@ -596,7 +596,7 @@ public class TestNettyServerWithCallbacks {
     }
 
     @Override
-    public TestRecord echo(TestRecord record) throws AvroRemoteException {
+    public TestRecord echo(TestRecord record) {
       releaseEnterPermit();
       acquireRunPermit();
       try {
@@ -607,7 +607,7 @@ public class TestNettyServerWithCallbacks {
     }
 
     @Override
-    public int add(int arg1, int arg2) throws AvroRemoteException {
+    public int add(int arg1, int arg2) {
       releaseEnterPermit();
       acquireRunPermit();
       try {
@@ -618,7 +618,7 @@ public class TestNettyServerWithCallbacks {
     }
 
     @Override
-    public ByteBuffer echoBytes(ByteBuffer data) throws AvroRemoteException {
+    public ByteBuffer echoBytes(ByteBuffer data) {
       releaseEnterPermit();
       acquireRunPermit();
       try {
@@ -629,7 +629,7 @@ public class TestNettyServerWithCallbacks {
     }
 
     @Override
-    public Void error() throws AvroRemoteException, TestError {
+    public Void error() throws TestError {
       releaseEnterPermit();
       acquireRunPermit();
       try {

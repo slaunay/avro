@@ -151,13 +151,13 @@ public class TestNettyServerConcurrentExecution {
     }
     
     @Override
-    public int add(int arg1, int arg2) throws AvroRemoteException {
+    public int add(int arg1, int arg2) {
       // Step 1:
       return arg1 + arg2;
     }
     
     @Override
-    public String hello(String greeting) throws AvroRemoteException {
+    public String hello(String greeting) {
       if (greeting.equals("wait")) {
         try {
           // Step 3a:
@@ -182,17 +182,17 @@ public class TestNettyServerConcurrentExecution {
     // All RPCs below this line are irrelevant to this test:
     
     @Override
-    public TestRecord echo(TestRecord record) throws AvroRemoteException {
+    public TestRecord echo(TestRecord record) {
       return record;
     }
 
     @Override
-    public ByteBuffer echoBytes(ByteBuffer data) throws AvroRemoteException {
+    public ByteBuffer echoBytes(ByteBuffer data) {
       return data;
     }
 
     @Override
-    public Void error() throws AvroRemoteException, TestError {
+    public Void error() throws TestError {
       throw new TestError("TestError");
     }
   }

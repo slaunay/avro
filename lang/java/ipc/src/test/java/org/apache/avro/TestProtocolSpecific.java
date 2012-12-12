@@ -73,7 +73,7 @@ public class TestProtocolSpecific {
     public int add(int arg1, int arg2) { return arg1 + arg2; }
     public TestRecord echo(TestRecord record) { return record; }
     public ByteBuffer echoBytes(ByteBuffer data) { return data; }
-    public Void error() throws AvroRemoteException {
+    public Void error() throws TestError {
       if (throwUndeclaredError) throw new RuntimeException("foo");
       throw TestError.newBuilder().setMessage$("an error").build();
     }

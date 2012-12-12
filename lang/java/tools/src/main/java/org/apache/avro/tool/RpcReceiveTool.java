@@ -29,7 +29,6 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
-import org.apache.avro.AvroRemoteException;
 import org.apache.avro.Protocol;
 import org.apache.avro.Protocol.Message;
 import org.apache.avro.generic.GenericDatumWriter;
@@ -72,7 +71,7 @@ public class RpcReceiveTool implements Tool {
 
     @Override
     public Object respond(Message message, Object request)
-    throws AvroRemoteException {
+    throws IOException {
       if (!message.equals(expectedMessage)) {
         out.println(String.format("Expected message '%s' but received '%s'.", 
             expectedMessage.getName(), message.getName()));

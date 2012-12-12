@@ -91,7 +91,7 @@ public class TestRpcPluginOrdering {
   }
   
   private static class TestMailImpl implements Mail{
-    public String send(Message message) throws AvroRemoteException {
+    public String send(Message message) {
       return "Received";
     }
     public void fireandforget(Message message) {
