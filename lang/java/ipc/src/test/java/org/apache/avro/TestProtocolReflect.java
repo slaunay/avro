@@ -129,7 +129,7 @@ public class TestProtocolReflect {
     RuntimeException error = null;
     try {
       proxy.error();
-    } catch (RuntimeException e) {
+    } catch (AvroRuntimeException e) {
       error = e;
     } finally {
       this.throwUndeclaredError = false;

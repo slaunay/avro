@@ -181,7 +181,7 @@ public class TestBasicTracing {
 
     @Override
     public Object respond(Message message, Object request)
-        throws IOException {
+        throws Exception {
        assertTrue("w".equals(message.getName()));
        GenericRecord inParams = (GenericRecord)request;
        Integer currentCount = (Integer) inParams.get("req");

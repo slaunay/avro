@@ -53,7 +53,7 @@ public class TestLocalTransceiver {
   }
 
   @Test
-  public void testSingleRpc() throws IOException {
+  public void testSingleRpc() throws Exception {
     Transceiver t = new LocalTransceiver(new TestResponder(protocol));
     GenericRecord params = new GenericData.Record(protocol.getMessages().get(
         "m").getRequest());

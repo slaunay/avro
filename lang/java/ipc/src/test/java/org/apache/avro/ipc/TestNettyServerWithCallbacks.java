@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.avro.AvroRemoteException;
+import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.ipc.specific.SpecificRequestor;
 import org.apache.avro.ipc.specific.SpecificResponder;
 import org.apache.avro.test.Simple;
@@ -291,7 +292,7 @@ public class TestNettyServerWithCallbacks {
         try {
           simpleClient2.add(1, 2);
           Assert.fail("Send after server close should have thrown Exception");
-        } catch (AvroRemoteException e) {
+        } catch (AvroRuntimeException e) {
           ioeCaught = e.getCause() instanceof IOException;
           Assert.assertTrue("Expected IOException", ioeCaught);
         } catch (Exception e) {

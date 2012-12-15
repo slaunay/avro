@@ -17,6 +17,9 @@
  */
 package org.apache.avro;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.ipc.Server;
@@ -52,8 +55,8 @@ public class TestProtocolHttp extends TestProtocolSpecific {
     return REPEATING;
   }
 
-  @Test(expected=SocketTimeoutException.class)
-    public void testTimeout() throws Throwable {
+  @Test
+  public void testTimeout() throws Throwable {
     ServerSocket s = new ServerSocket(0);
     HttpTransceiver client =
       new HttpTransceiver(new URL("http://127.0.0.1:"+s.getLocalPort()+"/"));
@@ -61,8 +64,9 @@ public class TestProtocolHttp extends TestProtocolSpecific {
     Simple proxy = SpecificRequestor.getClient(Simple.class, client);
     try {
       proxy.hello("foo");
-    } catch (AvroRemoteException e) {
-      throw e.getCause();
+      fail("Should have failed with an exception");
+    } catch (AvroRuntimeException e) {
+      assertTrue("Got unwanted exception: " + e.getCause(), e.getCause() instanceof SocketTimeoutException);
     } finally {
       s.close();
     }

@@ -19,7 +19,7 @@
 package org.apache.avro;
 
 /** Base class for exceptions thrown to client by server. */
-public class AvroRemoteException extends RuntimeException {
+public class AvroRemoteException extends Exception {
   private Object value;
 
   protected AvroRemoteException() {}

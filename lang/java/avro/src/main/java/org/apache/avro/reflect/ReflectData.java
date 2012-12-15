@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 
-import org.apache.avro.AvroRemoteException;
 import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.AvroTypeException;
 import org.apache.avro.Protocol;
@@ -495,8 +494,7 @@ public class ReflectData extends SpecificData {
     List<Schema> errs = new ArrayList<Schema>();
     errs.add(Protocol.SYSTEM_ERROR);              // every method can throw
     for (Type err : method.getGenericExceptionTypes())
-      if (err != AvroRemoteException.class) 
-        errs.add(getSchema(err, names));
+      errs.add(getSchema(err, names));
     Schema errors = Schema.createUnion(errs);
 
     return protocol.createMessage(method.getName(), null /* doc */, request, response, errors);

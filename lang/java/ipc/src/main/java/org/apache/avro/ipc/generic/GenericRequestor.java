@@ -28,7 +28,6 @@ import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.Encoder;
-import org.apache.avro.ipc.Callback;
 import org.apache.avro.ipc.Requestor;
 import org.apache.avro.ipc.Transceiver;
 
@@ -37,34 +36,6 @@ public class GenericRequestor extends Requestor {
   public GenericRequestor(Protocol protocol, Transceiver transceiver)
     throws IOException {
     super(protocol, transceiver);
-  }
-
-  @Override
-  public Object request(String messageName, Object request)
-    throws IOException {
-    try {
-      return super.request(messageName, request);
-    } catch (Exception e) {
-      if (e instanceof RuntimeException)
-        throw (RuntimeException)e;
-      if (e instanceof IOException)
-        throw (IOException)e;
-      throw new AvroRemoteException(e);
-    }
-  }
-
-  @Override
-  public <T> void request(String messageName, Object request, Callback<T> callback)
-    throws IOException {
-    try {
-      super.request(messageName, request, callback);
-    } catch (Exception e) {
-      if (e instanceof RuntimeException)
-        throw (RuntimeException)e;
-      if (e instanceof IOException)
-        throw (IOException)e;
-      throw new AvroRemoteException(e);
-    }
   }
 
   @Override

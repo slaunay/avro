@@ -73,7 +73,7 @@ public class StatsPluginOverhead {
   }
 
   /** Sends RPCs and returns nanos elapsed. */
-  private static long sendRpcs(boolean withPlugin) throws IOException {
+  private static long sendRpcs(boolean withPlugin) throws Exception {
     HttpServer server = createServer(withPlugin);
     Transceiver t =
       new HttpTransceiver(new URL("http://127.0.0.1:"+server.getPort()+"/"));
